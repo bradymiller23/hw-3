@@ -56,8 +56,8 @@ url1 <- "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/
 url2 <- "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"
 ?read.csv()
 
-df1 <- read.csv(url1, sep = '.')
-df2 <- read.csv(url2, sep = '.')
+df1 <- read.csv(url1, sep = ';')
+df2 <- read.csv(url2, sep = ';')
 ```
 
 ---
@@ -74,9 +74,22 @@ Perform the following tasks to prepare the data frame `df` for analysis:
 
 
 ```{R}
+# adding the 'type' column to both the white and red wine data frames
 df1 <- df1 %>%
-  split()
-df <- ... # Insert your code here
+  mutate(type = 'white')
+df2 <- df2 %>%
+  mutate(type = 'red')
+
+# joining the two data frames on the type column
+df <- df1 %>%
+  full_join(df2, type = type)
+
+# changing the period in column names to underscores
+colnames(df) <- gsub('\\.', '_', colnames(df))
+
+# selecting all other columns beside fixed_acidity & free_sulfur_dioxide
+df <- df %>%
+  select(-c(fixed_acidity, free_sulfur_dioxide))
 ```
 
 
@@ -84,7 +97,10 @@ Your output to `R dim(df)` should be
 ```
 [1] 6497   11
 ```
-
+```{r}
+# checking dimensions of df
+dim(df)
+```
 
 
 ---
@@ -100,10 +116,29 @@ Recall from STAT 200, the method to compute the $t$ statistic for the the differ
 3. Using `sp_squared` and `diff_mean`, compute the $t$ Statistic, and store its value in a variable called `t1`.
 
 
-```R
-diff_mean <- ... # Insert your code here
-sp <-  ... # Insert your code here
-t1 <-  ... # Insert your code here
+```{R}
+# subsetting the data frame by type of wine (returns all rows for that wine type)
+# using the mean function to find the mean of quality for each wine
+red_wine_mean <- mean(subset(df, df$type == 'red')$quality)
+white_wine_mean <- mean(subset(df, df$type == 'white')$quality)
+
+# calculating the difference in mean between the 2 wine types
+diff_mean <- white_wine_mean - red_wine_mean
+
+
+# calculating the length and variance for quality for both wine types
+nW <- length(subset(df, df$type == 'white')$quality)
+nR <- length(subset(df, df$type == 'red')$quality)
+varW <- var((subset(df, df$type == 'white')$quality))
+varR <- var(subset(df, df$type == 'red')$quality)
+
+sp_squared <-  ((nW - 1) * varW + (nR - 1)* varR) / (nW + nR - 2)
+
+
+
+t1 <-  t.test(subset(df, df$type == 'white')$quality, subset(df, df$type == 'red')$quality, estimate = diff_mean, stderr = sq_squared) # Insert your code here
+
+t1
 ```
 
 
