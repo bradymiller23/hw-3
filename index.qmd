@@ -54,7 +54,6 @@ Read the wine quality datasets from the specified URLs and store them in data fr
 url1 <- "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv"
 
 url2 <- "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"
-?read.csv()
 
 df1 <- read.csv(url1, sep = ';')
 df2 <- read.csv(url2, sep = ';')
@@ -88,8 +87,14 @@ df <- df1 %>%
 colnames(df) <- gsub('\\.', '_', colnames(df))
 
 # selecting all other columns beside fixed_acidity & free_sulfur_dioxide
+# removing any missing values
 df <- df %>%
-  select(-c(fixed_acidity, free_sulfur_dioxide))
+  select(-c(fixed_acidity, free_sulfur_dioxide)) %>%
+  na.omit()
+
+# changing the type of the 'type' column
+df$type <- factor(df$type)
+  
 ```
 
 
@@ -132,13 +137,11 @@ nR <- length(subset(df, df$type == 'red')$quality)
 varW <- var((subset(df, df$type == 'white')$quality))
 varR <- var(subset(df, df$type == 'red')$quality)
 
-sp_squared <-  ((nW - 1) * varW + (nR - 1)* varR) / (nW + nR - 2)
+sp_squared <- ((nW - 1) * varW + (nR - 1)* varR) / (nW + nR - 2)
 
 
-
-t1 <-  t.test(subset(df, df$type == 'white')$quality, subset(df, df$type == 'red')$quality, estimate = diff_mean, stderr = sq_squared) # Insert your code here
-
-t1
+# computing t-statistic for given mean differnce and pooled sample variance
+t1 <- diff_mean/(sqrt(sp_squared * (1/nW + 1/nR)))
 ```
 
 
@@ -150,9 +153,10 @@ Equivalently, R has a function called `t.test()` which enables you to perform a 
 
 Perform a two-sample t-test to compare the quality of white and red wines using the `t.test()` function with the setting `var.equal=TRUE`. Store the t-statistic in `t2`.
 
-```R
-t_test <- t.test(...) # Insert your code here
-t2 <- ... # Insert your code here
+```{R}
+t_test <- t.test( subset(df, df$type == 'white')$quality, subset(df, df$type == 'red')$quality, var.equal = TRUE)
+
+t2 <- t_test$statistic
 ```
 
 ---
@@ -161,9 +165,10 @@ t2 <- ... # Insert your code here
 
 Fit a linear regression model to predict `quality` from `type` using the `lm()` function, and extract the $t$-statistic for the `type` coefficient from the model summary. Store this $t$-statistic in `t3`.
 
-```R
-fit <- lm(...) # Insert your here
-t3 <- ... # Insert your here
+```{R}
+fit <- lm(df$quality ~ df$type)
+fit
+t3 <- fit$coefficients[2]
 ```
 
 
@@ -173,11 +178,19 @@ t3 <- ... # Insert your here
 
 Print a vector containing the values of `t1`, `t2`, and `t3`. What can you conclude from this? Why?
 
-```R
-c(t1, t2, t3) # Insert your code here
+```{R}
+c(t1, t2, t3)
 ```
-
-
+From the printed vector containing 't1', 't2', 't3', I can conclude that the
+difference between the 2 groups (red wine and white wine) is large relative to 
+their variability. This can be interpreted based on the t-statistic from our 
+calculations being ~9.68. From the t test, we saw that the $p$-value associated
+with the t-statistic is very small, indicating that the type of wine, is a good predictor of the quality of the wine. t3 is the type coefficient from the linear 
+regression model summary between type and quality. Since type is categorical, 
+the intercept is one of the types of wine (in this case red), while the other
+coefficient is the other type of wine (in this case white). Red wine is the 
+baseline level and the white wine coefficient indicates that the quality 
+increases on average, about 0.2418868 when going from red wine to white wine.
 
 
 <br><br><br><br>
@@ -197,11 +210,18 @@ Collinearity
 
 Fit a linear regression model with all predictors against the response variable `quality`. Use the `broom::tidy()` function to print a summary of the fitted model. What can we conclude from the model summary?
 
-
-```R
-... # Insert your code here
+```{R}
+model <- lm(quality ~ ., df)
+summary(model) %>%
+  broom::tidy()
 ```
 
+From the model summary we can conclude that a given wines citric acid and total
+sulfur dioxide may not be very important in the final model. These two variables
+have higher $p$-values compared to the other variables $p$-values, which allows
+us to infer that they may not be necessary and aren't good predictors of a wines
+quality. The rest of the variables have very small $p$-values which means they 
+are significant 
 
 ---
 
@@ -210,14 +230,28 @@ Fit a linear regression model with all predictors against the response variable 
 Fit two **simple** linear regression models using `lm()`: one with only `citric_acid` as the predictor, and another with only `total_sulfur_dioxide` as the predictor. In both models, use `quality` as the response variable. How does your model summary compare to the summary from the previous question?
 
 
-```R
-model_citric <- ... # Insert your code here
+```{R}
+model_citric <- lm(quality ~ citric_acid, df)
+summary(model_citric) %>%
+  broom::tidy()
 ```
 
-```R
-model_sulfur <- ... # Insert your code here
+```{R}
+model_sulfur <- lm(quality ~ total_sulfur_dioxide, df)
+summary(model_sulfur) %>%
+  broom::tidy()
 ```
-
+The model summary's for the new models are pretty different than the original
+model that we created. In the original model, it indicated that citric_acid is 
+not significant in the prediction of a wine's quality as it had a high $p$-value. However, in the new model that uses citric_acid to predict quality, it says that 
+citric acid is very significant and a good predictor as it has a very small $p$-
+value. Next, in the original model, it also said that the total sulfur 
+dioxide was not significant either as it had a $p$-value around 0.2. In the new
+model where total sulfur dioxide predicts wine quality, it indicates that the 
+total sulfur dioxide is more significant than before as it now has a $p$-value 
+of 0.0008. This means it could be a decent predictor of a wine's quality. Both 
+the new models indicate that the given variables are more significant than 
+the original model said they were.
 
 ---
 
