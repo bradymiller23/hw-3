@@ -774,9 +774,9 @@ Call:  cv.glmnet(x = make_model_matrix(forward_formula), y = y, alpha = 1)
 
 Measure: Mean-Squared Error 
 
-      Lambda Index Measure      SE Nonzero
-min 0.000917    66  0.5443 0.01193      10
-1se 0.028674    29  0.5560 0.01192       4</code></pre>
+      Lambda Index Measure       SE Nonzero
+min 0.000478    73  0.5441 0.008350      10
+1se 0.018008    34  0.5517 0.008446       8</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>ridgeReg <span class="ot">&lt;-</span> <span class="fu">cv.glmnet</span>(<span class="at">x =</span> <span class="fu">make_model_matrix</span>(forward_formula), <span class="at">y =</span> y, <span class="at">alpha =</span> <span class="dv">0</span>)</span>
 <span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>ridgeReg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -786,9 +786,9 @@ Call:  cv.glmnet(x = make_model_matrix(forward_formula), y = y, alpha = 0)
 
 Measure: Mean-Squared Error 
 
-    Lambda Index Measure      SE Nonzero
-min 0.0388   100  0.5455 0.01281      10
-1se 0.2272    81  0.5582 0.01334      10</code></pre>
+    Lambda Index Measure       SE Nonzero
+min 0.0388   100  0.5453 0.007740      10
+1se 0.1566    85  0.5528 0.008705      10</code></pre>
 </div>
 </div>
 <p>Create side-by-side plots of the ridge and LASSO regression results. Interpret your main findings.</p>
@@ -805,40 +805,82 @@ min 0.0388   100  0.5455 0.01281      10
 </section>
 <section id="points-16" class="level6">
 <h6 class="anchored" data-anchor-id="points-16">3.4 (5 points)</h6>
-<p>Print the coefficient values for LASSO regression at the <code>lambda.1se</code> value? What are the variables selected by LASSO?</p>
-<p>Store the variable names with non-zero coefficients in <code>lasso_vars</code>, and create a formula object called <code>lasso_formula</code> using the <code>make_formula()</code> function provided in the Appendix.</p>
-<div class="cell">
+<p>Print the coefficient values for LASSO regression at the <code>lambda.1se</code> value? What are the variables selected by LASSO? ::: {.cell}</p>
 <div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>lasso_coef <span class="ot">&lt;-</span> <span class="fu">coef</span>(lassoReg, <span class="at">s =</span> <span class="st">"lambda.1se"</span>)</span>
-<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="co"># can do lambda.1se to choose different lambda that will result in diff amount of variables chosen</span></span>
-<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>selected_vars <span class="ot">&lt;-</span> <span class="fu">rownames</span>(lasso_coef)[<span class="fu">which</span>(<span class="fu">abs</span>(lasso_coef) <span class="sc">&gt;</span> <span class="dv">0</span>)][<span class="sc">-</span><span class="dv">1</span>] <span class="co"># exclude the intercept term</span></span>
-<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>lasso_coef</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>lasso_coef</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>11 x 1 sparse Matrix of class "dgCMatrix"
-                              s1
-(Intercept)           5.81837771
-volatile_acidity     -0.19397623
-citric_acid           .         
-residual_sugar        0.04407054
-chlorides             .         
-total_sulfur_dioxide  .         
-density               .         
-pH                    .         
-sulphates             0.05807551
-alcohol               0.36804141
-type                  .         </code></pre>
+                               s1
+(Intercept)           5.844658849
+volatile_acidity     -0.215088802
+citric_acid           .          
+residual_sugar        0.069273939
+chlorides            -0.007696409
+total_sulfur_dioxide -0.011014155
+density               .          
+pH                    0.006930773
+sulphates             0.069651370
+alcohol               0.381754098
+type                 -0.034860871</code></pre>
 </div>
+<p>::: * The variables selected by LASSO are volatile_acidity, residual_sugar, total_sulfur_dioxide, pH, sulphates and alcohol.</p>
+<p>Store the variable names with non-zero coefficients in <code>lasso_vars</code>, and create a formula object called <code>lasso_formula</code> using the <code>make_formula()</code> function provided in the Appendix.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>lasso_vars <span class="ot">&lt;-</span> <span class="fu">rownames</span>(lasso_coef)[<span class="fu">which</span>(<span class="fu">abs</span>(lasso_coef) <span class="sc">&gt;</span> <span class="dv">0</span>)][<span class="sc">-</span><span class="dv">1</span>] </span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>make_formula <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.formula</span>(</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste</span>(<span class="st">"quality ~ "</span>, <span class="fu">paste</span>(x, <span class="at">collapse =</span> <span class="st">" + "</span>))</span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>lasso_formula <span class="ot">&lt;-</span> <span class="fu">make_formula</span>(lasso_vars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 </section>
 <section id="points-17" class="level6">
 <h6 class="anchored" data-anchor-id="points-17">3.5 (5 points)</h6>
 <p>Print the coefficient values for ridge regression at the <code>lambda.1se</code> value? What are the variables selected here?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>ridge_coef <span class="ot">&lt;-</span> <span class="fu">coef</span>(ridgeReg, <span class="at">s =</span> <span class="st">"lambda.1se"</span>)</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>ridge_coef</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>11 x 1 sparse Matrix of class "dgCMatrix"
+                              s1
+(Intercept)           5.89208677
+volatile_acidity     -0.18836482
+citric_acid           0.01721478
+residual_sugar        0.11167415
+chlorides            -0.04481638
+total_sulfur_dioxide -0.04027017
+density              -0.08890876
+pH                    0.02572467
+sulphates             0.08571325
+alcohol               0.28530948
+type                 -0.09777210</code></pre>
+</div>
+</div>
+<ul>
+<li>The ridge regression method chooses all of the variables from the data frame, as none have a dot next to its name, indicating that ridge regression deems all the variables to be necessary in the final model</li>
+</ul>
 <p>Store the variable names with non-zero coefficients in <code>ridge_vars</code>, and create a formula object called <code>ridge_formula</code> using the <code>make_formula()</code> function provided in the Appendix.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>ridge_vars <span class="ot">&lt;-</span> <span class="fu">rownames</span>(ridge_coef)[<span class="fu">which</span>(<span class="fu">abs</span>(ridge_coef) <span class="sc">&gt;</span> <span class="dv">0</span>)][<span class="sc">-</span><span class="dv">1</span>] </span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>make_formula <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.formula</span>(</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste</span>(<span class="st">"quality ~ "</span>, <span class="fu">paste</span>(x, <span class="at">collapse =</span> <span class="st">" + "</span>))</span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>ridge_formula <span class="ot">&lt;-</span> <span class="fu">make_formula</span>(ridge_vars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <hr>
 </section>
 <section id="points-18" class="level6">
 <h6 class="anchored" data-anchor-id="points-18">3.6 (10 points)</h6>
 <p>What is the difference between stepwise selection, LASSO and ridge based on you analyses above?</p>
+<p>The LASSO regression only selected 6 variables for the final model (volatile_acidity, residual_sugar, total_sulfur_dioxide, pH, sulphates, alcohol), while ridge selected all variables and stepwise selection chose 8 variables for the final model (alcohol, volatile_acidity, sulphates, residual_sugar, type, density, chlorides, pH). Based on this, I can determine that LASSO tends to produce more sparse formulas based on the penalty that can force a given variables coefficient to be 0, thus eliminating it from the final model. As for ridge, it kept a lot more variables in the final model, which may make it difficult to interpret how important a certain variable is because other variables make influence its value. Stepwise selection works a little differently in that it adds variables based on that variables impact on the AIC value.</p>
 <p><br><br><br><br> <br><br><br><br></p>
 <hr>
 </section>
@@ -862,73 +904,78 @@ type                  .         </code></pre>
 <section id="points-20" class="level6">
 <h6 class="anchored" data-anchor-id="points-20">4.1 (5 points)</h6>
 <p>Excluding <code>quality</code> from <code>df</code> we have <span class="math inline">\(10\)</span> possible predictors as the covariates. How many different models can we create using any subset of these <span class="math inline">\(10\)</span> coavriates as possible predictors? Justify your answer.</p>
+<p>There are 1023 different models that we could create using any subset of the <span class="math inline">\(10\)</span> covariates as possible predictors. The model could contain only any amount of covariates ranging from 0-10. For each amount of covariates that you want to include in a given model, there are different groupings of covariates that you can choose between to make a different model. You could no have no covariates, as it would just be using the intercept of the response variable, which is what we used for the null models in stepwise selection. Another way to show this is to do… <span class="math display">\[
+\sum_{i=0}^{n=10}nCr(10,i)
+\]</span> This sums up all the combinations for each amount of covariates that you chould choose for a model.</p>
 <hr>
 </section>
 <section id="points-21" class="level6">
 <h6 class="anchored" data-anchor-id="points-21">4.2 (20 points)</h6>
 <p>Store the names of the predictor variables (all columns except <code>quality</code>) in an object called <code>x_vars</code>.</p>
-<div class="sourceCode" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>x_vars <span class="ot">&lt;-</span> <span class="fu">colnames</span>(df <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>quality))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>x_vars <span class="ot">&lt;-</span> <span class="fu">colnames</span>(df <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>quality))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>Use:</p>
 <ul>
 <li>the <code>combn()</code> function (built-in R function) and</li>
 <li>the <code>make_formula()</code> (provided in the Appendix)</li>
 </ul>
 <p>to <strong>generate all possible linear regression formulas</strong> using the variables in <code>x_vars</code>. This is most optimally achieved using the <code>map()</code> function from the <code>purrr</code> package.</p>
-<div class="sourceCode" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>formulas <span class="ot">&lt;-</span> <span class="fu">map</span>(</span>
-<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(x_vars),</span>
-<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  \(x){</span>
-<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>    vars <span class="ot">&lt;-</span> <span class="fu">combn</span>(...) <span class="co"># Insert code here</span></span>
-<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">map</span>(vars, ...) <span class="co"># Insert code here</span></span>
-<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> <span class="fu">unlist</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>formulas <span class="ot">&lt;-</span> <span class="fu">map</span>(</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(x_vars),</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>  \(x){</span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>    vars <span class="ot">&lt;-</span> <span class="fu">combn</span>(...) <span class="co"># Insert code here</span></span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">map</span>(vars, ...) <span class="co"># Insert code here</span></span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> <span class="fu">unlist</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>If your code is right the following command should return something along the lines of:</p>
-<div class="sourceCode" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(formulas, <span class="dv">4</span>) <span class="sc">%&gt;%</span> <span class="fu">as.character</span>()</span>
-<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Output:</span></span>
-<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="co"># [1] "quality ~ volatile_acidity + residual_sugar + density + pH + alcohol"                                                 </span></span>
-<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a><span class="co"># [2] "quality ~ citric_acid"                                                                                                </span></span>
-<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a><span class="co"># [3] "quality ~ volatile_acidity + citric_acid + residual_sugar + total_sulfur_dioxide + density + pH + sulphates + alcohol"</span></span>
-<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a><span class="co"># [4] "quality ~ citric_acid + chlorides + total_sulfur_dioxide + pH + alcohol + type"  </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(formulas, <span class="dv">4</span>) <span class="sc">%&gt;%</span> <span class="fu">as.character</span>()</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Output:</span></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="co"># [1] "quality ~ volatile_acidity + residual_sugar + density + pH + alcohol"                                                 </span></span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a><span class="co"># [2] "quality ~ citric_acid"                                                                                                </span></span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a><span class="co"># [3] "quality ~ volatile_acidity + citric_acid + residual_sugar + total_sulfur_dioxide + density + pH + sulphates + alcohol"</span></span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a><span class="co"># [4] "quality ~ citric_acid + chlorides + total_sulfur_dioxide + pH + alcohol + type"  </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <hr>
 </section>
 <section id="points-22" class="level6">
 <h6 class="anchored" data-anchor-id="points-22">4.3 (10 points)</h6>
 <p>Use <code>map()</code> and <code>lm()</code> to fit a linear regression model to each formula in <code>formulas</code>, using <code>df</code> as the data source. Use <code>broom::glance()</code> to extract the model summary statistics, and bind them together into a single tibble of summaries using the <code>bind_rows()</code> function from <code>dplyr</code>.</p>
-<div class="sourceCode" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>models <span class="ot">&lt;-</span> <span class="fu">map</span>(formulas, ...) <span class="co"># Insert your code here</span></span>
-<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>summaries <span class="ot">&lt;-</span> <span class="fu">map</span>(models, ...) <span class="co"># Insert your code here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>models <span class="ot">&lt;-</span> <span class="fu">map</span>(formulas, ...) <span class="co"># Insert your code here</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>summaries <span class="ot">&lt;-</span> <span class="fu">map</span>(models, ...) <span class="co"># Insert your code here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <hr>
 </section>
 <section id="points-23" class="level6">
 <h6 class="anchored" data-anchor-id="points-23">4.4 (5 points)</h6>
 <p>Extract the <code>adj.r.squared</code> values from <code>summaries</code> and use them to identify the formula with the <em><strong>highest</strong></em> adjusted R-squared value.</p>
-<div class="sourceCode" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>... <span class="co"># Insert your code here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>... <span class="co"># Insert your code here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Store resulting formula as a variable called <code>rsq_formula</code>.</p>
-<div class="sourceCode" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>rsq_formula <span class="ot">&lt;-</span> ... <span class="co"># Insert your code</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>rsq_formula <span class="ot">&lt;-</span> ... <span class="co"># Insert your code</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <hr>
 </section>
 <section id="points-24" class="level6">
 <h6 class="anchored" data-anchor-id="points-24">4.5 (5 points)</h6>
 <p>Extract the <code>AIC</code> values from <code>summaries</code> and use them to identify the formula with the <strong><em>lowest</em></strong> AIC value.</p>
-<div class="sourceCode" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>... <span class="co"># Insert your code here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>... <span class="co"># Insert your code here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Store resulting formula as a variable called <code>aic_formula</code>.</p>
-<div class="sourceCode" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>aic_formula <span class="ot">&lt;-</span> ... <span class="co"># Insert your code</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>aic_formula <span class="ot">&lt;-</span> ... <span class="co"># Insert your code</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <hr>
 </section>
 <section id="points-25" class="level6">
 <h6 class="anchored" data-anchor-id="points-25">4.6 (15 points)</h6>
 <p>Combine all formulas shortlisted into a single vector called <code>final_formulas</code>.</p>
-<div class="sourceCode" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>null_formula <span class="ot">&lt;-</span> <span class="fu">formula</span>(null_model)</span>
-<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>full_formula <span class="ot">&lt;-</span> <span class="fu">formula</span>(full_model)</span>
-<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>final_formulas <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>  null_formula,</span>
-<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a>  full_formula,</span>
-<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>  backward_formula,</span>
-<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a>  forward_formula,</span>
-<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>  lasso_formula, </span>
-<span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a>  ridge_formula,</span>
-<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a>  rsq_formula,</span>
-<span id="cb62-12"><a href="#cb62-12" aria-hidden="true" tabindex="-1"></a>  aic_formula</span>
-<span id="cb62-13"><a href="#cb62-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>null_formula <span class="ot">&lt;-</span> <span class="fu">formula</span>(null_model)</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>full_formula <span class="ot">&lt;-</span> <span class="fu">formula</span>(full_model)</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a>final_formulas <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a>  null_formula,</span>
+<span id="cb66-6"><a href="#cb66-6" aria-hidden="true" tabindex="-1"></a>  full_formula,</span>
+<span id="cb66-7"><a href="#cb66-7" aria-hidden="true" tabindex="-1"></a>  backward_formula,</span>
+<span id="cb66-8"><a href="#cb66-8" aria-hidden="true" tabindex="-1"></a>  forward_formula,</span>
+<span id="cb66-9"><a href="#cb66-9" aria-hidden="true" tabindex="-1"></a>  lasso_formula, </span>
+<span id="cb66-10"><a href="#cb66-10" aria-hidden="true" tabindex="-1"></a>  ridge_formula,</span>
+<span id="cb66-11"><a href="#cb66-11" aria-hidden="true" tabindex="-1"></a>  rsq_formula,</span>
+<span id="cb66-12"><a href="#cb66-12" aria-hidden="true" tabindex="-1"></a>  aic_formula</span>
+<span id="cb66-13"><a href="#cb66-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li><p>Are <code>aic_formula</code> and <code>rsq_formula</code> the same? How do they differ from the formulas shortlisted in question 3?</p></li>
 <li><p>Which of these is more reliable? Why?</p></li>
@@ -939,12 +986,12 @@ type                  .         </code></pre>
 <section id="points-26" class="level6">
 <h6 class="anchored" data-anchor-id="points-26">4.7 (10 points)</h6>
 <p>Use <code>map()</code> and <code>glance()</code> to extract the <code>sigma, adj.r.squared, AIC, df</code>, and <code>p.value</code> statistics for each model obtained from <code>final_formulas</code>. Bind them together into a single data frame <code>summary_table</code>. Summarize your main findings.</p>
-<div class="sourceCode" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>summary_table <span class="ot">&lt;-</span> <span class="fu">map</span>(</span>
-<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>  final_formulas, </span>
-<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>  \(x) ... <span class="co"># Insert your code here</span></span>
-<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>()</span>
-<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>summary_table <span class="sc">%&gt;%</span> knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>summary_table <span class="ot">&lt;-</span> <span class="fu">map</span>(</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>  final_formulas, </span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>  \(x) ... <span class="co"># Insert your code here</span></span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>()</span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a>summary_table <span class="sc">%&gt;%</span> knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="hidden" data-unless-format="pdf">
 <div style="page-break-after: always;"></div>
 </div>
@@ -957,32 +1004,32 @@ type                  .         </code></pre>
 <section id="convenience-function-for-creating-a-formula-object" class="level4">
 <h4 class="anchored" data-anchor-id="convenience-function-for-creating-a-formula-object">Convenience function for creating a formula object</h4>
 <p>The following function which takes as input a vector of column names <code>x</code> and outputs a <code>formula</code> object with <code>quality</code> as the response variable and the columns of <code>x</code> as the covariates.</p>
-<div class="sourceCode" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>make_formula <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
-<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.formula</span>(</span>
-<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste</span>(<span class="st">"quality ~ "</span>, <span class="fu">paste</span>(x, <span class="at">collapse =</span> <span class="st">" + "</span>))</span>
-<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a><span class="co"># For example the following code will</span></span>
-<span id="cb64-8"><a href="#cb64-8" aria-hidden="true" tabindex="-1"></a><span class="co"># result in a formula object</span></span>
-<span id="cb64-9"><a href="#cb64-9" aria-hidden="true" tabindex="-1"></a><span class="co"># "quality ~ a + b + c"</span></span>
-<span id="cb64-10"><a href="#cb64-10" aria-hidden="true" tabindex="-1"></a><span class="fu">make_formula</span>(<span class="fu">c</span>(<span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>make_formula <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.formula</span>(</span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste</span>(<span class="st">"quality ~ "</span>, <span class="fu">paste</span>(x, <span class="at">collapse =</span> <span class="st">" + "</span>))</span>
+<span id="cb68-4"><a href="#cb68-4" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb68-5"><a href="#cb68-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb68-6"><a href="#cb68-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-7"><a href="#cb68-7" aria-hidden="true" tabindex="-1"></a><span class="co"># For example the following code will</span></span>
+<span id="cb68-8"><a href="#cb68-8" aria-hidden="true" tabindex="-1"></a><span class="co"># result in a formula object</span></span>
+<span id="cb68-9"><a href="#cb68-9" aria-hidden="true" tabindex="-1"></a><span class="co"># "quality ~ a + b + c"</span></span>
+<span id="cb68-10"><a href="#cb68-10" aria-hidden="true" tabindex="-1"></a><span class="fu">make_formula</span>(<span class="fu">c</span>(<span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="convenience-function-for-glmnet" class="level4">
 <h4 class="anchored" data-anchor-id="convenience-function-for-glmnet">Convenience function for <code>glmnet</code></h4>
 <p>The <code>make_model_matrix</code> function below takes a <code>formula</code> as input and outputs a <strong>rescaled</strong> model matrix <code>X</code> in a format amenable for <code>glmnet()</code></p>
-<div class="sourceCode" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>make_model_matrix <span class="ot">&lt;-</span> <span class="cf">function</span>(formula){</span>
-<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>  X <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(rsq_formula, df)[, <span class="sc">-</span><span class="dv">1</span>]</span>
-<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>  cnames <span class="ot">&lt;-</span> <span class="fu">colnames</span>(X)</span>
-<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(X)){</span>
-<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span>cnames[i] <span class="sc">==</span> <span class="st">"typewhite"</span>){</span>
-<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a>      X[, i] <span class="ot">&lt;-</span> <span class="fu">scale</span>(X[, i])</span>
-<span id="cb65-7"><a href="#cb65-7" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb65-8"><a href="#cb65-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">colnames</span>(X)[i] <span class="ot">&lt;-</span> <span class="st">"type"</span></span>
-<span id="cb65-9"><a href="#cb65-9" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb65-10"><a href="#cb65-10" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb65-11"><a href="#cb65-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(X)</span>
-<span id="cb65-12"><a href="#cb65-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>make_model_matrix <span class="ot">&lt;-</span> <span class="cf">function</span>(formula){</span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>  X <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(rsq_formula, df)[, <span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>  cnames <span class="ot">&lt;-</span> <span class="fu">colnames</span>(X)</span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(X)){</span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span>cnames[i] <span class="sc">==</span> <span class="st">"typewhite"</span>){</span>
+<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a>      X[, i] <span class="ot">&lt;-</span> <span class="fu">scale</span>(X[, i])</span>
+<span id="cb69-7"><a href="#cb69-7" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb69-8"><a href="#cb69-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">colnames</span>(X)[i] <span class="ot">&lt;-</span> <span class="st">"type"</span></span>
+<span id="cb69-9"><a href="#cb69-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb69-10"><a href="#cb69-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb69-11"><a href="#cb69-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(X)</span>
+<span id="cb69-12"><a href="#cb69-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="callout-note callout callout-style-default callout-captioned">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -997,7 +1044,7 @@ Session Information
 <div class="callout-body-container callout-body">
 <p>Print your <code>R</code> session information using the following command</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>R version 4.2.2 (2022-10-31 ucrt)
 Platform: x86_64-w64-mingw32/x64 (64-bit)

@@ -379,25 +379,57 @@ this case is approximately -3.
 ###### 3.4  (5 points)
 
 Print the coefficient values for LASSO regression at the `lambda.1se` value? What are the variables selected by LASSO? 
+```{r}
+lasso_coef <- coef(lassoReg, s = "lambda.1se")
+lasso_coef
+```
+* The variables selected by LASSO are volatile_acidity, residual_sugar, 
+  total_sulfur_dioxide, pH, sulphates and alcohol. 
+
+
 
 Store the variable names with non-zero coefficients in `lasso_vars`, and create a formula object called `lasso_formula` using the `make_formula()` function provided in the Appendix. 
 
 ```{r}
-lasso_coef <- coef(lassoReg, s = "lambda.1se")
-# can do lambda.1se to choose different lambda that will result in diff amount of variables chosen
-selected_vars <- rownames(lasso_coef)[which(abs(lasso_coef) > 0)][-1] # exclude the intercept term
-lasso_coef
+lasso_vars <- rownames(lasso_coef)[which(abs(lasso_coef) > 0)][-1] 
 
+make_formula <- function(x){
+  as.formula(
+    paste("quality ~ ", paste(x, collapse = " + "))
+  )
+}
+
+lasso_formula <- make_formula(lasso_vars)
 ```
+
 ---
 
 ###### 3.5  (5 points)
 
 Print the coefficient values for ridge regression at the `lambda.1se` value? What are the variables selected here? 
 
+```{r}
+ridge_coef <- coef(ridgeReg, s = "lambda.1se")
+ridge_coef
+```
+* The ridge regression method chooses all of the variables from the data frame, as 
+none have a dot next to its name, indicating that ridge regression deems all the 
+variables to be necessary in the final model
+
+
 Store the variable names with non-zero coefficients in `ridge_vars`, and create a formula object called `ridge_formula` using the `make_formula()` function provided in the Appendix. 
 
+```{r}
+ridge_vars <- rownames(ridge_coef)[which(abs(ridge_coef) > 0)][-1] 
 
+make_formula <- function(x){
+  as.formula(
+    paste("quality ~ ", paste(x, collapse = " + "))
+  )
+}
+
+ridge_formula <- make_formula(ridge_vars)
+```
 
 ---
 
@@ -405,7 +437,18 @@ Store the variable names with non-zero coefficients in `ridge_vars`, and create 
 
 What is the difference between stepwise selection, LASSO and ridge based on you analyses above?
 
-
+The LASSO regression only selected 6 variables for the final model 
+(volatile_acidity, residual_sugar, total_sulfur_dioxide, pH, sulphates, alcohol),
+while ridge selected all variables and stepwise selection chose 8 variables for 
+the final model (alcohol, volatile_acidity, sulphates, residual_sugar, type, 
+density, chlorides, pH). Based on this, I can determine that LASSO tends to 
+produce more sparse formulas based on the penalty that can force a given 
+variables coefficient to be 0, thus eliminating it from the final model. As for
+ridge, it kept a lot more variables in the final model, which may make it 
+difficult to interpret how important a certain variable is because other 
+variables make influence its value. Stepwise selection works a little 
+differently in that it adds variables based on that variables impact on the AIC 
+value.
 
 
 
@@ -428,6 +471,21 @@ Variable selection
 
 Excluding `quality` from `df` we have $10$ possible predictors as the covariates. How many different models can we create using any subset of these $10$ coavriates as possible predictors? Justify your answer. 
 
+There are 1023 different models that we could create using any subset of
+the $10$ covariates as possible predictors. The model could contain only any 
+amount of covariates ranging from 0-10. For each amount of covariates that you 
+want to include in a given model, there are different groupings of covariates
+that you can choose between to make a different model. You could no have 
+no covariates, as it would just be using the intercept of the response variable, 
+which is what we used for the null models in stepwise selection. Another way to 
+show this is to do...
+$$
+\sum_{i=0}^{n=10}nCr(10,i)
+$$
+This sums up all the combinations for each amount of covariates that you chould 
+choose for a model.
+
+
 ---
 
 
@@ -435,7 +493,7 @@ Excluding `quality` from `df` we have $10$ possible predictors as the covariates
 
 Store the names of the predictor variables (all columns except `quality`) in an object called `x_vars`.
 
-```R
+```{R}
 x_vars <- colnames(df %>% select(-quality))
 ```
 
