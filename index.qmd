@@ -504,19 +504,22 @@ Use:
 
 to **generate all possible linear regression formulas** using the variables in `x_vars`. This is most optimally achieved using the `map()` function from the `purrr` package.
 
-```R
+```{R}
+x_vars
 formulas <- map(
   1:length(x_vars),
   \(x){
-    vars <- combn(...) # Insert code here
-    map(vars, ...) # Insert code here
+    vars <- combn(x_vars, 1) 
+    map(vars, ~make_formula(combn(x_var)))
   }
 ) %>% unlist()
+formulas
+combn(x_vars, 2)
 ```
 
 If your code is right the following command should return something along the lines of:
 
-```R
+```{R}
 sample(formulas, 4) %>% as.character()
 # Output:
 # [1] "quality ~ volatile_acidity + residual_sugar + density + pH + alcohol"                                                 
