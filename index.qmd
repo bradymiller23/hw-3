@@ -509,12 +509,34 @@ x_vars
 formulas <- map(
   1:length(x_vars),
   \(x){
-    vars <- combn(x_vars, 1) 
-    map(vars, ~make_formula(combn(x_var)))
+    vars <- combn(x_vars,2, simplify = FALSE) 
+    map(vars, make_formula(vars))
   }
 ) %>% unlist()
 formulas
-combn(x_vars, 2)
+```
+
+```{r}
+?map()
+make_formula <- function(x){
+  as.formula(
+    paste("quality ~ ", paste(x, collapse = " + "))
+  )
+}
+
+?map()
+?seq()
+?combn()
+# Define the input variables
+x_vars <- c("x1", "x2", "x3")
+
+# Generate all possible combinations of input variables
+combs <- unlist(lapply(seq_along(x_vars), function(i) combn(x_vars, i, simplify = FALSE)), recursive = FALSE)
+
+# Generate all possible linear regression formulas
+formulas <- lapply(combs, function(vars) paste("y ~", paste(vars, collapse = " + ")))
+formulas
+
 ```
 
 If your code is right the following command should return something along the lines of:
