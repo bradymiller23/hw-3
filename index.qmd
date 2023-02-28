@@ -496,6 +496,7 @@ Store the names of the predictor variables (all columns except `quality`) in an 
 
 ```{R}
 x_vars <- colnames(df %>% select(-quality))
+x_vars
 ```
 
 Use: 
@@ -506,39 +507,15 @@ Use:
 to **generate all possible linear regression formulas** using the variables in `x_vars`. This is most optimally achieved using the `map()` function from the `purrr` package.
 
 ```{R}
-x_vars
 formulas <- map(
   1:length(x_vars),
   \(x){
-    vars <- combn(x_vars, i, simplify = FALSE) 
-    map(1:length(vars), ~make_formula(vars))
+    vars <- combn(x_vars, x, simplify = FALSE) 
+    map(vars, make_formula)
   }
 ) %>% unlist()
-formulas
 ```
 
-```{r}
-?map()
-make_formula <- function(x){
-  as.formula(
-    paste("quality ~ ", paste(x, collapse = " + "))
-  )
-}
-
-?map()
-?seq()
-?combn()
-# Define the input variables
-x_vars <- c("x1", "x2", "x3")
-
-# Generate all possible combinations of input variables
-combs <- unlist(lapply(seq_along(x_vars), function(i) combn(x_vars, i, simplify = FALSE)), recursive = FALSE)
-
-# Generate all possible linear regression formulas
-formulas <- lapply(combs, function(vars) paste("y ~", paste(vars, collapse = " + ")))
-formulas
-
-```
 
 If your code is right the following command should return something along the lines of:
 
