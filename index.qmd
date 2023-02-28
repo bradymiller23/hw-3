@@ -510,8 +510,8 @@ x_vars
 formulas <- map(
   1:length(x_vars),
   \(x){
-    vars <- combn(x_vars,2, simplify = FALSE) 
-    map(vars, make_formula(vars))
+    vars <- combn(x_vars, i, simplify = FALSE) 
+    map(1:length(vars), ~make_formula(vars))
   }
 ) %>% unlist()
 formulas
